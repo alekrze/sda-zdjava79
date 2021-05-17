@@ -20,7 +20,7 @@ public class Workshop3a {
 
     private static List<City> getCities(String countryCode) throws SQLException {
         final List<City> cities = new LinkedList<>();
-        try (final Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:6306/world", "root", "example")) {
+        try (final Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/world", "root", "19891017Aleksandra")) {
             try(final PreparedStatement statement = connection.prepareStatement("select * from city where CountryCode = ? order by name;")) {
                 statement.setString(1, countryCode);
                 final ResultSet resultSet = statement.executeQuery();

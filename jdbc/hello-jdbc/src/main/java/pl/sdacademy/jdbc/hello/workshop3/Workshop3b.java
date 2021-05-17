@@ -3,6 +3,8 @@ package pl.sdacademy.jdbc.hello.workshop3;
 import pl.sdacademy.jdbc.hello.common.City;
 
 import java.sql.*;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Scanner;
 
 public class Workshop3b {
@@ -25,6 +27,35 @@ public class Workshop3b {
     }
 
     private static boolean addCity(City city) throws SQLException {
-        throw new UnsupportedOperationException("TODO");
+        boolean exists = false;
+        //Tworzy obiekt połączenia i po try się zamyka
+        try (Connection connection =
+                     DriverManager.getConnection("jdbc:mysql://localhost:3306/world", "root", "19891017Aleksandra")) {
+            //preparestatement jest zasobem który trzeba zwalniać
+            try (PreparedStatement preparedStatement
+                         = connection.prepareStatement("SELECT EXISTS (SELECT * FROM city WHERE name=? AND countryCode = ?);")) {
+                //Parametryzowanie zapytania - szukamy Stringa dokładnie którego wpisujemy
+                preparedStatement.setString(1, city.getName());
+                preparedStatement.setString(2, city.getCountryCode());
+                ResultSet resultSet = preparedStatement.executeQuery();
+                resultSet.next();
+                // Dobieramy się do wartości jednej jedynej kolumny
+                exists = resultSet.getBoolean(1);
+            }
+            if (exists) {
+                try (PreparedStatement preparedStatement
+                             = connection.prepareStatement("UPDATE city SET District=?, " +
+                        "Population=? WHERE countryCode=? AND name=?;")) {
+                    preparedStatement.setString(1, city.getDistrict());
+                    preparedStatement.setInt(2, city.getPopulation());
+                    preparedStatement.setString(3, city.getCountryCode());
+                    preparedStatement.setString(4, city.getName());
+                    preparedStatement.executeUpdate();
+                }
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return !exists;
     }
 }
